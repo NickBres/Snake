@@ -115,7 +115,7 @@ def message_box(subject, content):
 
 if __name__ == '__main__':
     global width, rows
-    width = 500  # width of the screen
+    width = 1000  # width of the screen
     rows = 20  # number of rows to split the screen
     pygame.init()
     window = pygame.display.set_mode((width, width))  # square screen
