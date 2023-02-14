@@ -8,6 +8,7 @@ from tkinter import messagebox
 class cube(object):
     width = 1000
     rows = 20
+
     def __init__(self, start, dirnx=1, dirny=0, color=(255, 0, 0)):
         self.pos = start
         self.dirnx = 1
@@ -19,7 +20,7 @@ class cube(object):
         self.dirny = dirny
         self.pos = (self.pos[0] + self.dirnx, self.pos[1] + self.dirny)
 
-    def draw(self, surface, eyes=False):
+    def draw(self, surface, eyes=False, score=False):
         dis = self.width // self.rows
         r = self.pos[0]
         c = self.pos[1]
@@ -85,10 +86,28 @@ class snake(object):
         self.turns[self.head.pos[:]] = [s.dirnx, self.dirny]  # add the position of the head to the turns dictionary
 
     def reset(self, pos):
-        pass
+        self.head = cube(pos)
+        self.body = []
+        self.body.append(self.head)
+        self.turns = {}
+        self.dirnx = 0
+        self.dirny = 1
 
     def addCube(self):
-        pass
+        tail = self.body[-1]
+        dx, dy = tail.dirnx, tail.dirny
+        if dx == 1 and dy == 0:
+            self.body.append(cube((tail.pos[0] - 1, tail.pos[1])))
+        elif dx == -1 and dy == 0:
+            self.body.append(cube((tail.pos[0] + 1, tail.pos[1])))
+        elif dx == 0 and dy == 1:
+            self.body.append(cube((tail.pos[0], tail.pos[1] - 1)))
+        elif dx == 0 and dy == -1:
+            self.body.append(cube((tail.pos[0], tail.pos[1] + 1)))
+
+        self.body[-1].dirnx = dx
+        self.body[-1].dirny = dy
+
 
     def draw(self, surface):
         for i, c in enumerate(self.body):
@@ -114,11 +133,12 @@ def drawGrid(width, rows, surface):
 
 
 def redrawWindow(surface):
-    global rows, width, s
+    global rows, width, s , snack
     BLACK = (0, 0, 0)
     surface.fill(BLACK)  # fill the window with black
     drawGrid(width, rows, surface)
     s.draw(surface)
+    snack.draw(surface)
     pygame.display.update()  # update the screen
 
 
@@ -127,22 +147,34 @@ def randomSnack(rows, item):
     while True:
         x = random.randrange(rows)
         y = random.randrange(rows)
-       # if len(list(filter(lambda  z:z.pos == (x,y),positions))) > 0:
-
+        if len(list(filter(lambda z: z.pos == (x, y), positions))) > 0:
+            continue
+        else:
+            break
+    return (x, y)
 
 
 def message_box(subject, content):
-    pass
+    root = tkinter.Tk()
+    root.attributes("-topmost", True)
+    root.withdraw()
+    messagebox.showinfo(subject, content)
+    try:
+        root.destroy()
+    except:
+        pass
 
 
 if __name__ == '__main__':
-    global width, rows, s
+    global width, rows, s , snack
     width = 1000  # width of the screen
     rows = 20  # number of rows to split the screen
     pygame.init()
     window = pygame.display.set_mode((width, width))  # square screen
     RED = (255, 0, 0)
+    GREEN = (0, 255, 0)
     s = snake(RED, (10, 10))  # snake color and position
+    snack = cube(randomSnack(rows, s), color=GREEN)
     running = True
 
     clock = pygame.time.Clock()  # to control the speed of the game
@@ -151,9 +183,17 @@ if __name__ == '__main__':
         pygame.time.delay(50)  # delay in milliseconds
         clock.tick(10)  # 10 frames per second
         s.move()
+        if s.body[0].pos == snack.pos:
+            s.addCube()
+            snack = cube(randomSnack(rows, s), color=GREEN)
+        for x in range(len(s.body)):
+            if s.body[x].pos in list(map(lambda z: z.pos, s.body[x + 1:])):
+                print('Score: ', len(s.body))
+                #message_box('You Lost!', 'Play again...')
+                s.reset((10, 10))
+                break
+
         redrawWindow(window)
         for event in pygame.event.get():  # check if game not crashed. window will not show without this loop
             if event.type == pygame.QUIT:
                 pygame.quit()
-
-
