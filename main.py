@@ -6,17 +6,32 @@ from tkinter import messagebox
 
 
 class cube(object):
-    rows = 0
-    width = 0
-
+    width = 1000
+    rows = 20
     def __init__(self, start, dirnx=1, dirny=0, color=(255, 0, 0)):
-        pass
+        self.pos = start
+        self.dirnx = 1
+        self.dirny = 0
+        self.color = color
 
     def move(self, dirnx, dirny):
-        pass
+        self.dirnx = dirnx
+        self.dirny = dirny
+        self.pos = (self.pos[0] + self.dirnx, self.pos[1] + self.dirny)
 
     def draw(self, surface, eyes=False):
-        pass
+        dis = self.width // self.rows
+        r = self.pos[0]
+        c = self.pos[1]
+
+        pygame.draw.rect(surface, self.color, (r * dis + 1, c * dis + 1, dis - 2, dis - 2))
+        if eyes:
+            centre = dis // 2
+            radius = 5
+            circleMiddle = (r * dis + centre - radius, c * dis + 20)
+            circleMiddle2 = (r * dis + dis - radius * 2, c * dis + 20)
+            pygame.draw.circle(surface, (0, 0, 0), circleMiddle, radius)
+            pygame.draw.circle(surface, (0, 0, 0), circleMiddle2, radius)
 
 
 class snake(object):
@@ -99,14 +114,21 @@ def drawGrid(width, rows, surface):
 
 
 def redrawWindow(surface):
-    global rows, width
-    surface.fill((0, 0, 0))  # fill the screen with black
+    global rows, width, s
+    BLACK = (0, 0, 0)
+    surface.fill(BLACK)  # fill the window with black
     drawGrid(width, rows, surface)
+    s.draw(surface)
     pygame.display.update()  # update the screen
 
 
 def randomSnack(rows, item):
-    pass
+    positions = item.body
+    while True:
+        x = random.randrange(rows)
+        y = random.randrange(rows)
+       # if len(list(filter(lambda  z:z.pos == (x,y),positions))) > 0:
+
 
 
 def message_box(subject, content):
@@ -114,7 +136,7 @@ def message_box(subject, content):
 
 
 if __name__ == '__main__':
-    global width, rows
+    global width, rows, s
     width = 1000  # width of the screen
     rows = 20  # number of rows to split the screen
     pygame.init()
@@ -128,5 +150,10 @@ if __name__ == '__main__':
     while running:
         pygame.time.delay(50)  # delay in milliseconds
         clock.tick(10)  # 10 frames per second
+        s.move()
         redrawWindow(window)
+        for event in pygame.event.get():  # check if game not crashed. window will not show without this loop
+            if event.type == pygame.QUIT:
+                pygame.quit()
+
 
