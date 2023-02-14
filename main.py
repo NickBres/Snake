@@ -171,6 +171,7 @@ if __name__ == '__main__':
     rows = 20  # number of rows to split the screen
     pygame.init()
     window = pygame.display.set_mode((width, width))  # square screen
+    pygame.display.set_caption('Score: 0')
     RED = (255, 0, 0)
     GREEN = (0, 255, 0)
     s = snake(RED, (10, 10))  # snake color and position
@@ -183,6 +184,7 @@ if __name__ == '__main__':
         pygame.time.delay(50)  # delay in milliseconds
         clock.tick(10)  # 10 frames per second
         s.move()
+        pygame.display.set_caption('Score: ' + str(len(s.body) - 1))
         if s.body[0].pos == snack.pos:
             s.addCube()
             snack = cube(randomSnack(rows, s), color=GREEN)
